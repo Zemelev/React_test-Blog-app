@@ -2,28 +2,34 @@ import { useState, useEffect } from "react";
 import BlogList from "./BlogList";
 
 const Home = () => {
-    const [blogs, setBlogs] = useState([
-        { title: 'My new website', body: 'lorem ipsum...', author: 'dan', id: 1 },
-        { title: 'Welcome party!', body: 'lorem ipsum...', author: 'yoshi', id: 2 },
-        { title: 'Web dev top tips', body: 'lorem ipsum...', author: 'mario', id: 3 }
-    ]);
+    const [blogs, setBlogs] = useState(null);
+    const [isPending, setIsPending] = useState(true);
 
-    const handleDelete = (id) => {
-        const newBlogs = blogs.filter(blog => blog.id !== id);
-        setBlogs(newBlogs);
-    }
 
     useEffect(() => { //fires on every render
         //used for db connection or auth
-        console.log(blogs);
+        setTimeout(() => {
+            fetch('http://localhost:8000/blogs')
+            .then(res => {
+                return res.json();
+            })
+            .then(data => {
+                console.log(data);
+                setBlogs(data);
+                setIsPending(false);
+            })
+        }, 1000);
     }, []); 
 
     return ( 
         <div className="home">
-            <BlogList blogs={blogs} title="All Blogs" handleDelete={handleDelete}/>
+            { isPending && <div>Loading...</div> }
+            {blogs && <BlogList blogs={blogs} title="All Blogs" />}
             {/* <BlogList blogs={blogs.filter((blog) => blog.author === 'dan')} title="Dan's blogs" /> */}
         </div>
      );
 }
  
 export default Home;
+
+// npx json-server --watch data/db.json --port 8000
